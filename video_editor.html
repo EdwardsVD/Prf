@@ -1244,7 +1244,9 @@
         if (drag.sx != null && (Math.abs(e.clientX - drag.sx) > 10 || Math.abs(e.clientY - drag.sy) > 10)) cancelLongPress();
         var dt = (e.clientX - drag.x) / S.pxPerSec;
         if (drag.mode === 'move' || drag.mode === 'trim-in' || drag.mode === 'trim-out' || drag.mode === 'tmove') {
-          if (!drag.pushed) { pushUndo(); drag.pushed = true; }
+          // v0.1.0 fix: undo baru di-push kalau clip/teks benar-benar bergeser,
+          // bukan di event pointermove pertama yang belum menggeser apa pun.
+          if (!drag.pushed && Math.abs(dt) > 0.001) { pushUndo(); drag.pushed = true; }
         }
         if (drag.mode === 'move') {
           var c = clipById(drag.id);
@@ -1525,7 +1527,9 @@
     function exportSRT() {
       if (!S.texts.length) { toast('Tidak ada subtitle', 'bad'); return; }
       var lines = [];
-      var sorted = S.texts.slice().sort(function (a, b) { return a.start - b.start; });
+      // v0.1.0 fix: buang entry durasi 0/terbalik biar .srt tetap valid
+      var sorted = S.texts.filter(function (x) { return isNum(x.start) && isNum(x.end) && x.end > x.start; }).sort(function (a, b) { return a.start - b.start; });
+      if (!sorted.length) { toast('Tidak ada subtitle dengan durasi valid', 'bad'); return; }
       sorted.forEach(function (x, i) {
         function srtT(t) {
           var h = Math.floor(t / 3600), m = Math.floor(t % 3600 / 60), s = Math.floor(t % 60), ms = Math.floor((t - Math.floor(t)) * 1000);
@@ -1696,7 +1700,7 @@
         on('v19-c-start', 'change', function (e) { var v = parseFloat(e.target.value); if (isNum(v)) { pushUndo(); c.start = Math.max(0, v); c.end = c.start + (c.out - c.in) / c.rate; recompute(); renderAll(); markDirty(); } });
         on('v19-c-in', 'change', function (e) { var v = parseFloat(e.target.value); if (isNum(v)) { pushUndo(); c.in = clamp(v, 0, c.out - 0.05); c.end = c.start + (c.out - c.in) / c.rate; recompute(); renderAll(); markDirty(); } });
         on('v19-c-out', 'change', function (e) { var v = parseFloat(e.target.value); var mm = mediaById(c.mediaId); var maxO = (mm && isNum(mm.duration) && mm.duration > 0) ? mm.duration : 999999; if (isNum(v)) { pushUndo(); c.out = clamp(v, c.in + 0.05, maxO); c.end = c.start + (c.out - c.in) / c.rate; recompute(); renderAll(); markDirty(); } });
-        on('v19-c-rate', 'change', function (e) { pushUndo(); c.rate = parseFloat(e.target.value); c.end = c.start + (c.out - c.in) / c.rate; recompute(); renderAll(); markDirty(); });
+        on('v19-c-rate', 'change', function (e) { var v = parseFloat(e.target.value); if (isNum(v) && v > 0) { pushUndo(); c.rate = clamp(v, 0.05, 16); c.end = c.start + (c.out - c.in) / c.rate; recompute(); renderAll(); markDirty(); } });
         on('v19-set-in', 'click', function () { if (S.playhead > c.start && S.playhead < c.end) { pushUndo(); c.in = c.in + (S.playhead - c.start) * c.rate; c.start = S.playhead; recompute(); renderAll(); markDirty(); toast('In point di-set'); } else toast('Playhead harus di dalam clip', 'bad'); });
         on('v19-set-out', 'click', function () { if (S.playhead > c.start && S.playhead < c.end) { pushUndo(); c.out = c.in + (S.playhead - c.start) * c.rate; c.end = S.playhead; recompute(); renderAll(); markDirty(); toast('Out point di-set'); } else toast('Playhead harus di dalam clip', 'bad'); });
         on('v19-split', 'click', function () { splitAt(S.playhead); });
@@ -2112,6 +2116,8 @@
       return d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + '-' + p(d.getHours()) + p(d.getMinutes());
     }
     function startExport() {
+      // v0.1.0 fix: jangan mulai export kalau timeline kosong
+      if (!S.clips.length || S.total <= 0) { toast('Tidak ada clip untuk di-export', 'bad'); return; }
       var o = expOpts();
       var mime = pickMime();
       if (!window.MediaRecorder) { toast('Browser tidak mendukung MediaRecorder', 'bad'); return; }

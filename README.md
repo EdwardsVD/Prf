@@ -35,6 +35,20 @@ Mulai **v0.1.0** kedua mode dipisah menjadi file masing-masing (sebelumnya digab
 
 ## Changelog v0.1.0
 
+### Update 2 (bug hunt)
+
+- **Lyric Player**: baris `.lrc` dengan timestamp tapi **teks kosong sekarang terdeteksi** (misal `[01:03.09]` tanpa teks). Baris kosong jadi *penanda jeda*: di waktu itu layar langsung kosong/hitam polos, persis seperti layar kosong di awal video sebelum lirik pertama. Bonus: lirik sebelumnya juga berhenti tepat di timestamp marker, tidak perlu menunggu auto-hide.
+- **Lyric Player**: editor timing tidak lagi membuang baris kosong saat "Terapkan"; baris kosong ditampilkan dengan placeholder `(kosong — penanda jeda)`.
+- **Lyric Player**: export subtitle SRT/ASS/VTT melewatkan baris kosong (tidak jadi cue kosong yang invalid), tapi tetap memakainya sebagai batas akhir cue sebelumnya.
+- **Fix (Lyric Player)**: guard `currentIndex` basi setelah lirik diedit/dihapus (potensi crash seluruh app).
+- **Fix (Lyric Player)**: download `.lrc` tidak lagi revoke blob URL secara instan (bisa membatalkan download di beberapa browser).
+- **Fix (Video Editor)**: input **rate** clip sekarang divalidasi — field kosong/invalid tidak lagi membuat `NaN` yang merusak seluruh timeline; rate dibatasi 0.05–16x.
+- **Fix (Video Editor)**: undo tidak lagi di-push saat drag baru dimulai tanpa pergeseran nyata.
+- **Fix (Video Editor)**: export ditolak dengan pesan jelas kalau timeline masih kosong.
+- **Fix (Video Editor)**: `EXPORT .SRT` membuang entry durasi 0/terbalik supaya file `.srt` tetap valid.
+
+### Update 1
+
 - **Pisah mode**: Lyric Player dan Video Edit sekarang file terpisah, tidak ada lagi switcher 2-mode.
 - **Lyric Player**: hapus placeholder `"[Musik]"`; layar kosong/hitam polos saat tidak ada lirik.
 - **Lyric Player**: setting baru *Auto-Hide Lirik* (default 5 detik, bisa diubah) — lirik hilang saat jeda panjang tanpa lanjutan; berlaku juga untuk export video.

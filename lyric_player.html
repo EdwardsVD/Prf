@@ -13317,7 +13317,9 @@
       const tags = [...line.matchAll(timeTag)];
       if (tags.length === 0) continue;
       const text = line.replace(timeTag, "").trim();
-      if (!text) continue;
+      // v0.1.0 (fix): baris dengan timestamp tapi teks kosong TETAP dihitung,
+      // misal "[01:03.09]" tanpa teks -> jadi penanda jeda (layar kosong/hitam),
+      // sama seperti layar kosong di awal video sebelum lirik pertama.
       for (const t of tags) {
         const min = parseInt(t[1], 10);
         const sec = parseInt(t[2], 10);
@@ -14020,7 +14022,9 @@
       });
     });
     const apply = () => {
-      const cleaned = rows.map((r) => ({ time: Math.max(0, r.time), text: r.text })).filter((r) => r.text.trim().length > 0).sort((a, b) => a.time - b.time);
+      // v0.1.0 (fix): baris teks kosong TIDAK lagi dibuang — baris kosong
+      // adalah penanda jeda resmi (layar jadi kosong/hitam di waktu itu).
+      const cleaned = rows.map((r) => ({ time: Math.max(0, r.time), text: r.text })).sort((a, b) => a.time - b.time);
       onApply(cleaned);
       onClose();
     };
@@ -14115,7 +14119,8 @@
               {
                 value: r.text,
                 onChange: (e) => setText(r.id, e.target.value),
-                className: "flex-1 min-w-0 bg-[#0e0e0e] border border-[#1e1e1e] text-[#f5f5f0] font-mono text-[11px] px-2 py-1 focus:outline-none focus:border-[#d4ff3f]"
+                placeholder: "(kosong — penanda jeda)",
+                className: "flex-1 min-w-0 bg-[#0e0e0e] border border-[#1e1e1e] text-[#f5f5f0] font-mono text-[11px] px-2 py-1 placeholder:text-[#3a3a3a] focus:outline-none focus:border-[#d4ff3f]"
               }
             ),
             /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("button", { onClick: () => splitRow(r.id), className: miniBtn, title: "Pecah baris jadi dua", children: "⇹" }),
@@ -14511,7 +14516,8 @@
       a.href = URL.createObjectURL(blob);
       a.download = (audioFile.name.replace(/\.[^.]+$/, "") || "lirik") + ".lrc";
       a.click();
-      URL.revokeObjectURL(a.href);
+      // v0.1.0 fix: jangan revoke langsung — bisa membatalkan download di beberapa browser
+      setTimeout(() => URL.revokeObjectURL(a.href), 5e3);
       notify("File .lrc diunduh");
     };
     const applyEditedLyrics = (0, import_react3.useCallback)((next) => {
@@ -14594,10 +14600,13 @@
     const gapClearSec = typeof effects.gapClear === "number" && effects.gapClear > 0 ? effects.gapClear : 0;
     const adjustedNow = displayTime + offset / 1e3;
     let visibleIndex = currentIndex;
+    // v0.1.0 (fix): guard index basi — lirik bisa berkurang setelah edit,
+    // currentIndex lama di luar batas array bikin crash kalau tidak dijaga.
+    if (visibleIndex >= lyrics.length) visibleIndex = -1;
     if (visibleIndex >= 0 && visibleIndex < lyrics.length && gapClearSec > 0 && adjustedNow > lyricVisibleUntil(lyrics, visibleIndex, gapClearSec)) {
       visibleIndex = -1;
     }
-    let activeText = visibleIndex >= 0 ? lyrics[visibleIndex].text : "";
+    let activeText = visibleIndex >= 0 && visibleIndex < lyrics.length ? lyrics[visibleIndex].text : "";
     if (effects.zeroEmoji && visibleIndex >= 0) {
       activeText = removeEmojis(activeText);
     }
@@ -15851,9 +15860,13 @@
           const ms = Math.floor(t % 1 * 1e3);
           return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")},${String(ms).padStart(3, "0")}`;
         };
+        // v0.1.0 fix: baris kosong (penanda jeda) tidak ditulis sebagai cue,
+        // tapi tetap dipakai sebagai batas akhir cue sebelumnya.
         content = adjusted.map((l, i) => {
           const end = adjusted[i + 1] ? adjusted[i + 1].time : l.time + 3;
-          return `${i + 1}\n${srtT(l.time)} --> ${srtT(end)}\n${l.text}\n`;
+          return { l, end };
+        }).filter((e2) => e2.l.text.trim().length > 0).map((e2, i) => {
+          return `${i + 1}\n${srtT(e2.l.time)} --> ${srtT(e2.end)}\n${e2.l.text}\n`;
         }).join("\n");
       } else if (fmt === "ass") {
         const { w, h } = getCanvasSize();
@@ -15869,9 +15882,12 @@
           return `${h2}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}.${String(cs).padStart(2, "0")}`;
         };
         const header = `[Script Info]\nScriptType: v4.00+\nPlayResX: ${w}\nPlayResY: ${h}\n\n[V4+ Styles]\nFormat: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\nStyle: Default,${fontFamily},${fontSize},${hexToAss(fontColor)},&H000000FF,&H00000000,&H64000000,${bold ? -1 : 0},${italic ? -1 : 0},${underline ? -1 : 0},0,100,100,0,0,1,2,0,2,40,40,40,1\n\n[Events]\nFormat: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n`;
+        // v0.1.0 fix: sama seperti SRT — penanda jeda (teks kosong) dilewati
         content = header + adjusted.map((l, i) => {
           const end = adjusted[i + 1] ? adjusted[i + 1].time : l.time + 3;
-          return `Dialogue: 0,${assT(l.time)},${assT(end)},Default,,0,0,0,,${l.text.replace(/\n/g, "\\N")}`;
+          return { l, end };
+        }).filter((e2) => e2.l.text.trim().length > 0).map((e2) => {
+          return `Dialogue: 0,${assT(e2.l.time)},${assT(e2.end)},Default,,0,0,0,,${e2.l.text.replace(/\n/g, "\\N")}`;
         }).join("\n");
       }
       else if (fmt === "vtt") {
@@ -15882,9 +15898,12 @@
           const ms = Math.floor(t % 1 * 1e3);
           return `${String(h2).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}.${String(ms).padStart(3, "0")}`;
         };
+        // v0.1.0 fix: sama seperti SRT — penanda jeda (teks kosong) dilewati
         content = "WEBVTT\n\n" + adjusted.map((l, i) => {
           const end = adjusted[i + 1] ? adjusted[i + 1].time : l.time + 3;
-          return `${i + 1}\n${vttT(l.time)} --> ${vttT(end)}\n${l.text}\n`;
+          return { l, end };
+        }).filter((e2) => e2.l.text.trim().length > 0).map((e2, i) => {
+          return `${i + 1}\n${vttT(e2.l.time)} --> ${vttT(e2.end)}\n${e2.l.text}\n`;
         }).join("\n");
       } else if (fmt === "json") {
         content = JSON.stringify({
