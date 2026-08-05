@@ -2299,11 +2299,6 @@
         '<span class="hint">potong - efek - animasi - subtitle - export MP4</span>';
       document.body.appendChild(bar);
     }
-    function updateModeButtons() {
-      var p = qs('#v19-mode-player'), e = qs('#v19-mode-editor');
-      if (p) p.classList.toggle('on', S.mode === 'player');
-      if (e) e.classList.toggle('on', S.mode === 'editor');
-    }
     function applyModeClasses() {
       document.body.classList.toggle('v19-editor', S.mode === 'editor');
       document.body.classList.toggle('v19-player-mode', S.mode !== 'editor');
@@ -2312,7 +2307,6 @@
       // v0.1.0: standalone — hanya ada mode editor.
       S.mode = 'editor';
       applyModeClasses();
-      updateModeButtons();
       buildWorkspace();
       buildExportModal();
       renderAll();
@@ -2468,7 +2462,6 @@
       restoreDraft();
       S.mode = 'editor';
       applyModeClasses();
-      updateModeButtons();
       toast('VIDEO EDITOR v0.1.0 siap - import MP4 / video / gambar buat mulai');
       console.info('%c[Video Editor v0.1.0] standalone - potong, efek, animasi, subtitle, export MP4 (preview adaptif, loop hemat, filter cache).', 'color:#d4ff3f;font-weight:bold;');
     }
