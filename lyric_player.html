@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
-    <title>Lyric Player v0.1.0</title>
+    <title>Lyric Player v0.3.0</title>
     <style>
       html, body { margin: 0; padding: 0; background: #050505; }
       #root { height: 100vh; width: 100vw; }
@@ -12850,7 +12850,7 @@
     return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "absolute inset-0 flex flex-col items-center justify-center gap-7 z-20 p-6 text-center", children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "font-mono text-xs tracking-[0.28em] uppercase text-[#d4ff3f]", children: [
         "Lyric Player ",
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "text-[#4a4a4a]", children: "v0.1.0" })
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "text-[#4a4a4a]", children: "v0.3.0" })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { className: "text-[clamp(28px,5vw,44px)] font-bold tracking-tight", children: "Masukin lagu & lirik" }),
       session && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "flex items-center gap-3 border border-[#d4ff3f]/40 bg-[#d4ff3f]/5 rounded-sm px-4 py-2.5 max-w-[560px]", children: [
@@ -13304,7 +13304,12 @@
     gradientText: false,
     gradientColors: ["#d4ff3f", "#00ff88"],
     zeroEmoji: false,
-    gapClear: 5
+    gapClear: 5,
+    waveform: false,
+    waveformStyle: "bars",
+    waveformHeight: 90,
+    waveformColor: "#d4ff3f",
+    fullText: false
   };
   function removeEmojis(text) {
     return text.replace(/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F900}-\u{1F9FF}]|[\u{1FA00}-\u{1FA6F}]|[\u{1FA70}-\u{1FAFF}]|[\u{231A}-\u{231B}]|[\u{23E9}-\u{23F3}]|[\u{23F8}-\u{23FA}]|[\u{25AA}-\u{25AB}]|[\u{25B6}]|[\u{25C0}]|[\u{25FB}-\u{25FE}]|[\u{2614}-\u{2615}]|[\u{2648}-\u{2653}]|[\u{267F}]|[\u{2693}]|[\u{26A1}]|[\u{26AA}-\u{26AB}]|[\u{26BD}-\u{26BE}]|[\u{26C4}-\u{26C5}]|[\u{26CE}]|[\u{26D4}]|[\u{26EA}]|[\u{26F2}-\u{26F3}]|[\u{26F5}]|[\u{26FA}]|[\u{26FD}]|[\u{2702}]|[\u{2705}]|[\u{2708}-\u{270D}]|[\u{270F}]|[\u{2712}]|[\u{2714}]|[\u{2716}]|[\u{271D}]|[\u{2721}]|[\u{2728}]|[\u{2733}-\u{2734}]|[\u{2744}]|[\u{2747}]|[\u{274C}]|[\u{274E}]|[\u{2753}-\u{2755}]|[\u{2757}]|[\u{2763}-\u{2764}]|[\u{2795}-\u{2797}]|[\u{27A1}]|[\u{27B0}]|[\u{27BF}]|[\u{2934}-\u{2935}]|[\u{2B05}-\u{2B07}]|[\u{2B1B}-\u{2B1C}]|[\u{2B50}]|[\u{2B55}]|[\u{3030}]|[\u{303D}]|[\u{3297}]|[\u{3299}]|[\u{FE00}-\u{FE0F}]|[\u{200D}]/gu, "").trim();
@@ -14171,6 +14176,15 @@
     const currentIndexRef = (0, import_react3.useRef)(-1);
     const realDurRef = (0, import_react3.useRef)(0);
     const loadProjectRef = (0, import_react3.useRef)(null);
+    // v0.3.0: waveform visualizer (WebAudio)
+    const waveCanvasRef = (0, import_react3.useRef)(null);
+    const waveRafRef = (0, import_react3.useRef)(0);
+    const audioCtxRef = (0, import_react3.useRef)(null);
+    const analyserRef = (0, import_react3.useRef)(null);
+    const analyserSrcRef = (0, import_react3.useRef)(null);
+    // v0.3.0: full-text karaoke view
+    const fullTextRef = (0, import_react3.useRef)(null);
+    const fullTextHlRef = (0, import_react3.useRef)(null);
     const [playing, setPlaying] = (0, import_react3.useState)(false);
     const [currentTime, setCurrentTime] = (0, import_react3.useState)(0);
     const [duration, setDuration] = (0, import_react3.useState)(0);
@@ -14366,6 +14380,8 @@
     const togglePlay = () => {
       const audio = audioRef.current;
       if (!audio) return;
+      // v0.3.0: pastikan AudioContext waveform ikut resume (kebijakan autoplay)
+      if (effects.waveform) ensureAudioGraph();
       if (audio.paused) {
         audio.play().then(() => setPlaying(true)).catch(() => {
         });
@@ -14625,6 +14641,135 @@
     if (style.uppercase && fadingText) {
       fadingText = fadingText.toUpperCase();
     }
+    // ============================================================
+    // v0.3.0: GELOMBANG AUDIO (waveform visualizer, WebAudio API)
+    // Model bisa dipilih (bars/mirror/wave), tinggi & warna diatur
+    // di Settings > Effects.
+    // ============================================================
+    const ensureAudioGraph = (0, import_react3.useCallback)(() => {
+      const audio = audioRef.current;
+      if (!audio) return null;
+      try {
+        if (!audioCtxRef.current) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (!AC) return null;
+          audioCtxRef.current = new AC();
+        }
+        const actx = audioCtxRef.current;
+        if (analyserSrcRef.current !== audio) {
+          const src = actx.createMediaElementSource(audio);
+          const an = actx.createAnalyser();
+          an.fftSize = 1024;
+          an.smoothingTimeConstant = 0.82;
+          src.connect(an);
+          an.connect(actx.destination);
+          analyserRef.current = an;
+          analyserSrcRef.current = audio;
+        }
+        if (actx.state === "suspended") actx.resume().catch(() => {
+        });
+        return analyserRef.current;
+      } catch (err) {
+        return analyserRef.current;
+      }
+    }, []);
+    (0, import_react3.useEffect)(() => {
+      if (!effects.waveform) {
+        cancelAnimationFrame(waveRafRef.current);
+        const cv = waveCanvasRef.current;
+        if (cv) {
+          const g = cv.getContext("2d");
+          if (g) g.clearRect(0, 0, cv.width, cv.height);
+        }
+        return;
+      }
+      let alive = true;
+      const draw = () => {
+        if (!alive) return;
+        waveRafRef.current = requestAnimationFrame(draw);
+        const cv = waveCanvasRef.current;
+        if (!cv) return;
+        const dpr = Math.min(2, window.devicePixelRatio || 1);
+        const W = Math.max(2, Math.round(cv.clientWidth * dpr));
+        const H = Math.max(2, Math.round(cv.clientHeight * dpr));
+        if (cv.width !== W || cv.height !== H) {
+          cv.width = W;
+          cv.height = H;
+        }
+        const g = cv.getContext("2d");
+        if (!g) return;
+        g.clearRect(0, 0, W, H);
+        const an = analyserRef.current;
+        if (!an) return;
+        const color = effects.waveformColor || "#d4ff3f";
+        const mode = effects.waveformStyle || "bars";
+        g.fillStyle = color;
+        g.strokeStyle = color;
+        if (mode === "wave") {
+          const buf = new Uint8Array(an.fftSize);
+          an.getByteTimeDomainData(buf);
+          g.lineWidth = Math.max(1.5, 2 * dpr);
+          g.globalAlpha = 0.9;
+          g.beginPath();
+          const step = Math.max(1, Math.floor(buf.length / W));
+          for (let i = 0; i < buf.length; i += step) {
+            const x = i / buf.length * W;
+            const y = buf[i] / 255 * H;
+            if (i === 0) g.moveTo(x, y);
+            else g.lineTo(x, y);
+          }
+          g.stroke();
+          g.globalAlpha = 1;
+        } else {
+          const buf = new Uint8Array(an.frequencyBinCount);
+          an.getByteFrequencyData(buf);
+          const bars = mode === "mirror" ? 48 : 64;
+          const gapPx = 2 * dpr;
+          const bw = Math.max(1, (W - gapPx * (bars - 1)) / bars);
+          const usable = Math.floor(buf.length * 0.78);
+          for (let i = 0; i < bars; i++) {
+            const idx = Math.min(usable - 1, Math.floor(Math.pow(i / bars, 1.55) * usable));
+            const v = buf[idx] / 255;
+            const h = Math.max(2 * dpr, v * (H - 2 * dpr));
+            const x = i * (bw + gapPx);
+            g.globalAlpha = 0.25 + 0.75 * v;
+            if (mode === "mirror") {
+              g.fillRect(x, (H - h) / 2, bw, h);
+            } else {
+              g.fillRect(x, H - h, bw, h);
+            }
+          }
+          g.globalAlpha = 1;
+        }
+      };
+      ensureAudioGraph();
+      draw();
+      return () => {
+        alive = false;
+        cancelAnimationFrame(waveRafRef.current);
+      };
+    }, [effects.waveform, effects.waveformStyle, effects.waveformColor, ensureAudioGraph]);
+    (0, import_react3.useEffect)(() => () => {
+      cancelAnimationFrame(waveRafRef.current);
+      try {
+        if (audioCtxRef.current) audioCtxRef.current.close();
+      } catch (err) {
+      }
+    }, []);
+    // ============================================================
+    // v0.3.0: FULL TEXT .lrc (karaoke view) — background abu-abu
+    // pindah mulus ke baris aktif mengikuti waktu [mm:ss.ms].
+    // ============================================================
+    (0, import_react3.useEffect)(() => {
+      if (!effects.fullText) return;
+      const vp = fullTextRef.current;
+      const inner = fullTextHlRef.current;
+      if (!vp || !inner) return;
+      const el = visibleIndex >= 0 ? inner.querySelector(`[data-line="${visibleIndex}"]`) : null;
+      if (!el) return;
+      const y = el.offsetTop + el.offsetHeight / 2 - vp.clientHeight / 2;
+      inner.style.transform = `translateY(${-Math.max(0, y)}px)`;
+    }, [effects.fullText, visibleIndex, lyrics, style.fontSize]);
     const getAnimClass = () => {
       if (!animEnabled) return "";
       switch (animType) {
@@ -14679,12 +14824,14 @@
         .animate-lyricOut { animation: lyricOut ${Math.min(animSpeed, 300)}ms ease-in both; }
       ` }),
       effects.particles && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("canvas", { ref: canvasRef, className: "absolute inset-0 pointer-events-none z-[1]" }),
+      effects.waveform && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("canvas", { ref: waveCanvasRef, className: "absolute left-0 right-0 bottom-8 z-[5] pointer-events-none", style: { height: `${typeof effects.waveformHeight === "number" ? effects.waveformHeight : 90}px` } }),
       /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "absolute top-0 left-0 right-0 flex items-center justify-between px-5 py-4 z-20", children: [
         /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "font-mono text-[11px] tracking-[0.15em] uppercase text-[#4a4a4a] truncate max-w-[40vw]", children: [
           "Now Playing · ",
           /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "text-[#d4ff3f]", children: audioFile.name })
         ] }),
         /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "flex gap-2", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("button", { onClick: () => setEffects((e) => ({ ...e, fullText: !e.fullText })), className: effects.fullText ? ctrlBtnActive : ctrlBtn, title: "Mode full text: semua baris .lrc tampil, background abu-abu pindah mulus ikut waktu", children: "Full Text" }),
           /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("button", { onClick: () => setShowLyricList(!showLyricList), className: showLyricList ? ctrlBtnActive : ctrlBtn, title: "Daftar lirik, klik buat lompat (D)", children: "Daftar" }),
           /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("button", { onClick: () => setShowEditor(true), className: showEditor ? ctrlBtnActive : ctrlBtn, title: "Edit teks & timing lirik (E)", children: "Edit Lirik" }),
           /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("button", { onClick: () => setShowSettings(!showSettings), className: showSettings ? ctrlBtnActive : ctrlBtn, title: "Style, efek, timing (S)", children: "Settings" }),
@@ -14931,6 +15078,44 @@
               /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "font-mono text-[9px] text-[#4a4a4a] uppercase shrink-0", children: "dtk" })
             ] })
           ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "p-2 bg-[#0e0e0e] rounded border border-[#1e1e1e] space-y-2", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "flex items-center justify-between", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "font-mono text-[10px] text-[#d4ff3f] uppercase", children: "Gelombang Audio (Waveform)" }),
+                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "font-mono text-[8px] text-[#4a4a4a]", children: "Visualizer live di bawah layar. Model, tinggi & warna bisa diatur." })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("button", { onClick: () => setEffects((e) => ({ ...e, waveform: !e.waveform })), className: toggleBtn(effects.waveform), children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: toggleKnob(effects.waveform) }) })
+            ] }),
+            effects.waveform && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "space-y-2 pl-2 border-l border-[#1e1e1e]", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "flex items-center gap-2", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "font-mono text-[9px] text-[#4a4a4a] uppercase w-12 shrink-0", children: "Model" }),
+                /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("select", { value: effects.waveformStyle || "bars", onChange: (e) => setEffects((ef) => ({ ...ef, waveformStyle: e.target.value })), className: "flex-1 bg-[#0a0a0a] border border-[#1e1e1e] text-[#f5f5f0] font-mono text-[10px] px-1.5 py-1 rounded cursor-pointer", children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "bars", children: "Bars (kotak-kotak)" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "mirror", children: "Mirror (simetris tengah)" }),
+                  /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "wave", children: "Wave (garis halus)" })
+                ] })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("label", { className: "font-mono text-[9px] text-[#4a4a4a] uppercase", children: [
+                  "Tinggi: ",
+                  typeof effects.waveformHeight === "number" ? effects.waveformHeight : 90,
+                  " px"
+                ] }),
+                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("input", { type: "range", min: 30, max: 240, step: 5, value: typeof effects.waveformHeight === "number" ? effects.waveformHeight : 90, onChange: (e) => setEffects((ef) => ({ ...ef, waveformHeight: +e.target.value })), className: "w-full accent-[#d4ff3f]" })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "flex items-center gap-2", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "font-mono text-[9px] text-[#4a4a4a] uppercase", children: "Warna" }),
+                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("input", { type: "color", value: effects.waveformColor || "#d4ff3f", onChange: (e) => setEffects((ef) => ({ ...ef, waveformColor: e.target.value })), className: "w-10 h-6 bg-transparent border border-[#1e1e1e] cursor-pointer" })
+              ] })
+            ] })
+          ] }),
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "flex items-center justify-between p-2 bg-[#0e0e0e] rounded border border-[#1e1e1e]", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "font-mono text-[10px] text-[#d4ff3f] uppercase", children: "Full Text .lrc (Karaoke)" }),
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "font-mono text-[8px] text-[#4a4a4a]", children: "Semua baris lirik tampil; background abu-abu pindah mulus ke baris aktif mengikuti waktu [mm:ss.ms]. Klik baris buat lompat." })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("button", { onClick: () => setEffects((e) => ({ ...e, fullText: !e.fullText })), className: toggleBtn(effects.fullText), children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: toggleKnob(effects.fullText) }) })
+          ] }),
           /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "flex items-center justify-between p-2 bg-[#0e0e0e] rounded border border-[#1e1e1e]", children: [
             /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { children: [
               /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "font-mono text-[10px] text-[#d4ff3f] uppercase", children: "Zero Emoji" }),
@@ -15095,9 +15280,41 @@
         ] }) })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "absolute inset-0 flex items-center justify-center px-[6vw] text-center z-10", style: { backgroundColor: style.bgColor }, children: [
-        animEnabled && visibleIndex >= 0 && fadingIndex >= 0 && fadingIndex !== currentIndex && fadingText && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "absolute leading-snug max-w-[85vw] animate-lyricOut", style: getTextStyle(), children: fadingText }, `out-${fadingIndex}-${animKey}`),
-        /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: `${getAnimClass()} relative leading-snug max-w-[85vw]`, style: getTextStyle(), children: activeText }, animKey),
-        showNext && nextText && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "absolute bottom-[14vh] left-0 right-0 px-[6vw] font-mono text-[clamp(10px,1.3vw,14px)] text-[#4a4a4a] truncate pointer-events-none", children: nextText })
+        effects.fullText && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
+          "div",
+          {
+            ref: fullTextRef,
+            className: "absolute inset-x-0 top-[9vh] bottom-[13vh] overflow-hidden z-10",
+            children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { ref: fullTextHlRef, style: { transition: "transform 650ms cubic-bezier(.22,.61,.36,1)", willChange: "transform", paddingTop: "42vh", paddingBottom: "42vh" }, children: lyrics.map((l, i) => {
+              const isActive = i === visibleIndex;
+              const isPast = visibleIndex >= 0 && i < visibleIndex;
+              const lineText = l.text.trim() ? (style.uppercase ? l.text.toUpperCase() : l.text) : "· · ·";
+              return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", {
+                "data-line": i,
+                onClick: () => seekTo(l.time),
+                className: "flex items-baseline justify-center gap-3 rounded-lg cursor-pointer",
+                style: {
+                  width: "fit-content",
+                  maxWidth: "92%",
+                  padding: "6px 16px",
+                  margin: "3px auto",
+                  backgroundColor: isActive ? "rgba(128,128,128,0.32)" : "rgba(128,128,128,0)",
+                  opacity: isActive ? 1 : isPast ? 0.35 : 0.62,
+                  transform: isActive ? "scale(1.05)" : "scale(1)",
+                  transition: "background-color 500ms ease, opacity 500ms ease, transform 500ms ease"
+                },
+                children: [
+                  /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { style: { fontFamily: '"IBM Plex Mono", monospace', fontSize: "11px", letterSpacing: "0.08em", flexShrink: 0, color: isActive ? "#d4ff3f" : "#4a4a4a", transition: "color 500ms ease" }, children: `[${formatTimeWithMs2(l.time)}]` }),
+                  /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { style: { fontFamily: `"${style.fontFamily}", sans-serif`, fontSize: `clamp(15px, ${Math.max(15, Math.round(style.fontSize * 0.55))}px, 30px)`, fontWeight: style.bold ? "bold" : "normal", lineHeight: 1.45, color: isActive ? style.fontColor : "#8a8a8a", transition: "color 500ms ease" }, children: lineText })
+                ]
+              }, `ft-${i}`);
+            }) })
+          },
+          "fulltext-overlay"
+        ),
+        !effects.fullText && animEnabled && visibleIndex >= 0 && fadingIndex >= 0 && fadingIndex !== currentIndex && fadingText && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "absolute leading-snug max-w-[85vw] animate-lyricOut", style: getTextStyle(), children: fadingText }, `out-${fadingIndex}-${animKey}`),
+        !effects.fullText && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: `${getAnimClass()} relative leading-snug max-w-[85vw]`, style: getTextStyle(), children: activeText }, animKey),
+        !effects.fullText && showNext && nextText && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "absolute bottom-[14vh] left-0 right-0 px-[6vw] font-mono text-[clamp(10px,1.3vw,14px)] text-[#4a4a4a] truncate pointer-events-none", children: nextText })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "absolute bottom-0 left-0 right-0 z-20", children: [
         /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)(

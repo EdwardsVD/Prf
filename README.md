@@ -17,6 +17,11 @@ Mulai **v0.1.0** kedua mode dipisah menjadi file masing-masing (sebelumnya digab
 - Export video lirik (720p/1080p) langsung dari browser.
 - Proyek bisa disimpan/dibuka lagi (`.json`) + autosave sesi di localStorage.
 
+### Baru di v0.3.0: Gelombang Audio + Full Text Karaoke
+
+- **Gelombang Audio (Waveform)**: visualizer live yang tinggi, model (Bars / Mirror / Wave), dan warnanya bisa diatur — di Settings → Effects.
+- **Full Text .lrc**: semua baris lirik tampil; background abu-abu pindah mulus ke baris aktif mengikuti waktu `[mm:ss.ms]`. Tombol cepat **Full Text** di pojok kanan atas.
+
 ### Baru di v0.1.0: Auto-Hide Lirik (jeda)
 
 - Placeholder `"[Musik]"` **dihapus**. Saat tidak ada lirik aktif (intro, jeda, akhir lagu) layar tampil **kosong — hitam polos sesuai background**.
@@ -32,6 +37,22 @@ Mulai **v0.1.0** kedua mode dipisah menjadi file masing-masing (sebelumnya digab
 - Loop A-B, context menu (klik kanan / long-press), shortcut keyboard lengkap (tekan `?`).
 - Export MP4/WebM (MediaRecorder) sampai **1080p 60fps**; optimasi performa HP (preview adaptif, loop hemat baterai).
 - `Ctrl+S` simpan project (JSON) + autosave draft otomatis di browser.
+
+## Changelog v0.3.0 (Lyric Player)
+
+Update kali ini hanya di **Lyric Player** (`lyric_player.html`); Video Editor tidak berubah.
+
+- **Gelombang Audio (Waveform)** — visualizer live di bawah layar, dianalisis real-time dari audio via WebAudio. Bisa diatur:
+  - **Model**: `Bars` (kotak-kotak), `Mirror` (simetris tengah), `Wave` (garis halus)
+  - **Tinggi**: slider 30–240 px
+  - **Warna**: color picker
+  - Toggle cepat: tombol **Gelombang** di Settings → Effects
+- **Full Text .lrc (mode Karaoke)** — semua baris lirik dari `.lrc` tampil sekaligus:
+  - Baris aktif diberi **background abu-abu** yang **berpindah mulus** mengikuti waktu `[menit:detik:milidetik]` — transisi `transform`/warna halus, anti tiba-tiba
+  - Tiap baris menampilkan timestamp `[mm:ss.ms]`; klik baris untuk lompat
+  - Baris kosong (penanda jeda) tampil sebagai `· · ·`
+  - Tombol cepat **Full Text** di pojok kanan atas, atau Settings → Effects
+- Versi Lyric Player dinaikkan ke **v0.3.0**.
 
 ## Changelog v0.1.0
 
