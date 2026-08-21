@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Bangers&family=Bebas+Neue&family=Caveat:wght@400;700&family=Comic+Neue:wght@400;700&family=Dancing+Script:wght@400;700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;700&family=Lora:wght@400;600;700&family=Merriweather:wght@400;700&family=Montserrat:wght@400;600;700;800&family=Nunito:wght@400;600;700;800&family=Oswald:wght@400;600;700&family=Pacifico&family=Playfair+Display:wght@400;600;700&family=Poppins:wght@400;600;700;800&family=Righteous&family=Roboto+Slab:wght@400;600;700&family=Rubik:wght@400;600;700&family=Space+Grotesk:wght@400;500;700&family=Ubuntu:wght@400;700&display=swap" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com"></script>
-    <title>Lyric Player v0.3.0</title>
+    <title>Lyric Player v0.4.0</title>
     <style>
       html, body { margin: 0; padding: 0; background: #050505; }
       #root { height: 100vh; width: 100vw; }
@@ -12850,7 +12850,7 @@
     return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "absolute inset-0 flex flex-col items-center justify-center gap-7 z-20 p-6 text-center", children: [
       /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "font-mono text-xs tracking-[0.28em] uppercase text-[#d4ff3f]", children: [
         "Lyric Player ",
-        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "text-[#4a4a4a]", children: "v0.3.0" })
+        /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", { className: "text-[#4a4a4a]", children: "v0.4.0" })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", { className: "text-[clamp(28px,5vw,44px)] font-bold tracking-tight", children: "Masukin lagu & lirik" }),
       session && /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: "flex items-center gap-3 border border-[#d4ff3f]/40 bg-[#d4ff3f]/5 rounded-sm px-4 py-2.5 max-w-[560px]", children: [
@@ -13292,7 +13292,8 @@
     letterSpacing: 0,
     fontColor: "#ffffff",
     bgColor: "#000000",
-    fontFamily: "Space Grotesk"
+    fontFamily: "Space Grotesk",
+    bgDim: 0
   };
   var defaultEffects = {
     particles: false,
@@ -13309,10 +13310,14 @@
     waveformStyle: "bars",
     waveformHeight: 90,
     waveformColor: "#d4ff3f",
-    fullText: false
+    fullText: false,
+    fullTextTime: true
   };
   function removeEmojis(text) {
-    return text.replace(/[\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F900}-\u{1F9FF}]|[\u{1FA00}-\u{1FA6F}]|[\u{1FA70}-\u{1FAFF}]|[\u{231A}-\u{231B}]|[\u{23E9}-\u{23F3}]|[\u{23F8}-\u{23FA}]|[\u{25AA}-\u{25AB}]|[\u{25B6}]|[\u{25C0}]|[\u{25FB}-\u{25FE}]|[\u{2614}-\u{2615}]|[\u{2648}-\u{2653}]|[\u{267F}]|[\u{2693}]|[\u{26A1}]|[\u{26AA}-\u{26AB}]|[\u{26BD}-\u{26BE}]|[\u{26C4}-\u{26C5}]|[\u{26CE}]|[\u{26D4}]|[\u{26EA}]|[\u{26F2}-\u{26F3}]|[\u{26F5}]|[\u{26FA}]|[\u{26FD}]|[\u{2702}]|[\u{2705}]|[\u{2708}-\u{270D}]|[\u{270F}]|[\u{2712}]|[\u{2714}]|[\u{2716}]|[\u{271D}]|[\u{2721}]|[\u{2728}]|[\u{2733}-\u{2734}]|[\u{2744}]|[\u{2747}]|[\u{274C}]|[\u{274E}]|[\u{2753}-\u{2755}]|[\u{2757}]|[\u{2763}-\u{2764}]|[\u{2795}-\u{2797}]|[\u{27A1}]|[\u{27B0}]|[\u{27BF}]|[\u{2934}-\u{2935}]|[\u{2B05}-\u{2B07}]|[\u{2B1B}-\u{2B1C}]|[\u{2B50}]|[\u{2B55}]|[\u{3030}]|[\u{303D}]|[\u{3297}]|[\u{3299}]|[\u{FE00}-\u{FE0F}]|[\u{200D}]/gu, "").trim();
+    // v0.4.0 fix: cakupan emoji diperlengkap (blok 1F004/1F0CF, enclosed
+    // 1F170-1F19A, 1F200-an, tanda 203C/2049/2122/2139, panah 2194-21AA,
+    // 2328/23CF/23ED-23F2, keycap 20E3, tag sequence E0020-E007F, dll)
+    return text.replace(/[\u{1F004}\u{1F0CF}\u{1F170}-\u{1F171}\u{1F17E}-\u{1F17F}\u{1F18E}\u{1F191}-\u{1F19A}\u{1F201}-\u{1F202}\u{1F21A}\u{1F22F}\u{1F232}-\u{1F23A}\u{1F250}-\u{1F251}\u{1F600}-\u{1F64F}]|[\u{1F300}-\u{1F5FF}]|[\u{1F680}-\u{1F6FF}]|[\u{1F1E0}-\u{1F1FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F900}-\u{1F9FF}]|[\u{1FA00}-\u{1FA6F}]|[\u{1FA70}-\u{1FAFF}]|[\u{231A}-\u{231B}]|[\u{2328}\u{23CF}]|[\u{23E9}-\u{23F3}]|[\u{23ED}-\u{23F2}]|[\u{23F8}-\u{23FA}]|[\u{25AA}-\u{25AB}]|[\u{25B6}]|[\u{25C0}]|[\u{25FB}-\u{25FE}]|[\u{203C}\u{2049}\u{2122}\u{2139}]|[\u{2194}-\u{2199}]|[\u{21A9}-\u{21AA}]|[\u{2614}-\u{2615}]|[\u{2648}-\u{2653}]|[\u{267F}]|[\u{2693}]|[\u{26A1}]|[\u{26AA}-\u{26AB}]|[\u{26BD}-\u{26BE}]|[\u{26C4}-\u{26C5}]|[\u{26CE}]|[\u{26D4}]|[\u{26EA}]|[\u{26F2}-\u{26F3}]|[\u{26F5}]|[\u{26FA}]|[\u{26FD}]|[\u{2702}]|[\u{2705}]|[\u{2708}-\u{270D}]|[\u{270F}]|[\u{2712}]|[\u{2714}]|[\u{2716}]|[\u{271D}]|[\u{2721}]|[\u{2728}]|[\u{2733}-\u{2734}]|[\u{2744}]|[\u{2747}]|[\u{274C}]|[\u{274E}]|[\u{2753}-\u{2755}]|[\u{2757}]|[\u{2763}-\u{2764}]|[\u{2795}-\u{2797}]|[\u{27A1}]|[\u{27B0}]|[\u{27BF}]|[\u{2934}-\u{2935}]|[\u{2B05}-\u{2B07}]|[\u{2B1B}-\u{2B1C}]|[\u{2B50}]|[\u{2B55}]|[\u{3030}]|[\u{303D}]|[\u{3297}]|[\u{3299}]|[\u{FE00}-\u{FE0F}]|[\u{200D}]|[\u{20E3}]|[\u{E0020}-\u{E007F}]/gu, "").trim();
   }
   function parseLRC(raw) {
     const lines = raw.split(/\r?\n/);
@@ -13350,10 +13355,13 @@
     return m + ":" + s;
   }
   function formatTimeWithMs(t) {
-    if (isNaN(t)) return "00:00.0";
-    const m = Math.floor(t / 60).toString().padStart(2, "0");
-    const s = Math.floor(t % 60).toString().padStart(2, "0");
-    const ms = Math.floor(t % 1 * 10);
+    // v0.4.0 fix: dulu cuma 1 digit (persepuluh detik) padahal labelnya ms;
+    // sekarang bulatkan lewat total-milidetik biar aman dari float error
+    if (isNaN(t) || t < 0) return "00:00.000";
+    const total = Math.round(t * 1e3);
+    const m = Math.floor(total / 6e4).toString().padStart(2, "0");
+    const s = Math.floor(total % 6e4 / 1e3).toString().padStart(2, "0");
+    const ms = (total % 1e3).toString().padStart(3, "0");
     return `${m}:${s}.${ms}`;
   }
   function getCurrentLyricIndex(lyrics, currentTime) {
@@ -14185,6 +14193,12 @@
     // v0.3.0: full-text karaoke view
     const fullTextRef = (0, import_react3.useRef)(null);
     const fullTextHlRef = (0, import_react3.useRef)(null);
+    // v0.4.0: background foto/video (loop otomatis, teks tetap di tengah)
+    const [bgMediaFile, setBgMediaFile] = (0, import_react3.useState)(null);
+    const [bgMediaUrl, setBgMediaUrl] = (0, import_react3.useState)(null);
+    const [bgMediaKind, setBgMediaKind] = (0, import_react3.useState)("none");
+    const bgVideoRef = (0, import_react3.useRef)(null);
+    const bgInputRef = (0, import_react3.useRef)(null);
     const [playing, setPlaying] = (0, import_react3.useState)(false);
     const [currentTime, setCurrentTime] = (0, import_react3.useState)(0);
     const [duration, setDuration] = (0, import_react3.useState)(0);
@@ -14432,6 +14446,9 @@
           setShowSettings((v) => !v);
         } else if (e.key === "d" || e.key === "D") {
           setShowLyricList((v) => !v);
+        } else if (e.key === "t" || e.key === "T") {
+          // v0.4.0: T = toggle Full Text (karaoke)
+          setEffects((ef) => ({ ...ef, fullText: !ef.fullText }));
         } else if (e.key === "[") {
           setPlaybackRate((r) => Math.max(0.25, +(r - 0.25).toFixed(2)));
         } else if (e.key === "]") {
@@ -14770,6 +14787,67 @@
       const y = el.offsetTop + el.offsetHeight / 2 - vp.clientHeight / 2;
       inner.style.transform = `translateY(${-Math.max(0, y)}px)`;
     }, [effects.fullText, visibleIndex, lyrics, style.fontSize]);
+    // ============================================================
+    // v0.4.0: BACKGROUND FOTO/VIDEO — auto-loop kalau durasi
+    // background lebih pendek dari lagu, teks tetap di tengah.
+    // ============================================================
+    const bgMediaUrlRef = (0, import_react3.useRef)(null);
+    const onPickBgMedia = (0, import_react3.useCallback)((file) => {
+      if (!file) return;
+      const kind = (file.type || "").startsWith("video") ? "video" : (file.type || "").startsWith("image") ? "image" : null;
+      if (!kind) {
+        notify("Background harus file foto atau video");
+        return;
+      }
+      // v0.4.0 fix: URL dibuat DI LUAR state-updater (updater bisa dipanggil
+      // 2x oleh StrictMode -> bisa bikin object URL bocor kalau di dalam)
+      const url = URL.createObjectURL(file);
+      if (bgMediaUrl) setTimeout(() => URL.revokeObjectURL(bgMediaUrl), 4e3);
+      setBgMediaUrl(url);
+      setBgMediaFile(file);
+      setBgMediaKind(kind);
+      notify(kind === "video" ? "Background video dipasang — loop otomatis" : "Background foto dipasang");
+    }, [notify, bgMediaUrl]);
+    const clearBgMedia = (0, import_react3.useCallback)(() => {
+      if (bgMediaUrl) setTimeout(() => URL.revokeObjectURL(bgMediaUrl), 4e3);
+      setBgMediaUrl(null);
+      setBgMediaFile(null);
+      setBgMediaKind("none");
+    }, [bgMediaUrl]);
+    (0, import_react3.useEffect)(() => {
+      bgMediaUrlRef.current = bgMediaUrl;
+    }, [bgMediaUrl]);
+    (0, import_react3.useEffect)(() => () => {
+      if (bgMediaUrlRef.current) URL.revokeObjectURL(bgMediaUrlRef.current);
+    }, []);
+    (0, import_react3.useEffect)(() => {
+      const v = bgVideoRef.current;
+      if (!v || bgMediaKind !== "video") return;
+      if (playing) {
+        v.play().catch(() => {
+        });
+      } else {
+        v.pause();
+      }
+    }, [playing, bgMediaKind, bgMediaUrl]);
+    // ============================================================
+    // v0.4.0 fix: sesi terakhir menyimpan style/effects/offset tapi
+    // tidak pernah dipakai lagi — sekarang dipulihkan kalau nama
+    // file audionya sama dengan sesi yang tersimpan.
+    // ============================================================
+    (0, import_react3.useEffect)(() => {
+      try {
+        const s = loadSession();
+        if (!s || !audioFile || !s.audioName || s.audioName !== audioFile.name) return;
+        if (s.style) setStyle((prev) => ({ ...prev, ...s.style }));
+        if (s.effects) setEffects((prev) => ({ ...prev, ...s.effects }));
+        if (typeof s.offset === "number") setOffset(s.offset);
+        if (typeof s.animType === "string") setAnimType(s.animType);
+        if (typeof s.animSpeed === "number") setAnimSpeed(s.animSpeed);
+        if (typeof s.animEnabled === "boolean") setAnimEnabled(s.animEnabled);
+      } catch (err) {
+      }
+    }, []);
     const getAnimClass = () => {
       if (!animEnabled) return "";
       switch (animType) {
@@ -14992,13 +15070,44 @@
                 onChange: (e) => setStyle((s) => ({ ...s, fontFamily: e.target.value })),
                 className: "w-full bg-[#0e0e0e] border border-[#1e1e1e] text-[#f5f5f0] font-mono text-xs p-2 focus:outline-none focus:border-[#d4ff3f]",
                 children: [
-                  /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "Space Grotesk", children: "Space Grotesk" }),
-                  /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "IBM Plex Mono", children: "IBM Plex Mono" }),
-                  /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "Arial", children: "Arial" }),
-                  /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "Georgia", children: "Georgia" }),
-                  /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "Verdana", children: "Verdana" }),
-                  /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "Impact", children: "Impact" }),
-                  /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "Comic Sans MS", children: "Comic Sans MS" })
+                  /* v0.4.0: banyak pilihan font (Google Fonts dimuat di head) */
+                  /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("optgroup", { label: "Modern / Bersih", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "Space Grotesk", children: "Space Grotesk" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "Inter", children: "Inter" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "Poppins", children: "Poppins" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "Montserrat", children: "Montserrat" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "Rubik", children: "Rubik" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "Nunito", children: "Nunito" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "Ubuntu", children: "Ubuntu" })
+                  ] }),
+                  /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("optgroup", { label: "Tebal / Display", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "Bebas Neue", children: "Bebas Neue" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "Oswald", children: "Oswald" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "Archivo Black", children: "Archivo Black" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "Righteous", children: "Righteous" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "Bangers", children: "Bangers" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "Impact", children: "Impact (sistem)" })
+                  ] }),
+                  /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("optgroup", { label: "Elegan / Serif", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "Playfair Display", children: "Playfair Display" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "Lora", children: "Lora" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "Merriweather", children: "Merriweather" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "Roboto Slab", children: "Roboto Slab" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "Georgia", children: "Georgia (sistem)" })
+                  ] }),
+                  /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("optgroup", { label: "Santai / Handwriting", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "Pacifico", children: "Pacifico" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "Dancing Script", children: "Dancing Script" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "Caveat", children: "Caveat" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "Comic Neue", children: "Comic Neue" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "Comic Sans MS", children: "Comic Sans MS (sistem)" })
+                  ] }),
+                  /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("optgroup", { label: "Mono", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "IBM Plex Mono", children: "IBM Plex Mono" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "JetBrains Mono", children: "JetBrains Mono" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "Verdana", children: "Verdana (sistem)" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("option", { value: "Arial", children: "Arial (sistem)" })
+                  ] })
                 ]
               }
             )
@@ -15027,6 +15136,26 @@
                   className: "w-full h-8 bg-transparent border border-[#1e1e1e] cursor-pointer"
                 }
               )
+            ] })
+          ] }),
+          /* v0.4.0: background foto/video + dim + auto-loop */
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "p-2 bg-[#0e0e0e] rounded border border-[#1e1e1e] space-y-2", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "font-mono text-[10px] text-[#d4ff3f] uppercase", children: "Background Foto / Video" }),
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "font-mono text-[8px] text-[#4a4a4a]", children: "Teks tetap di tengah. Video pendek di-LOOP otomatis biar sinkron sama lagu (misal lagu 12 mnt, video 6 mnt → diputar ulang terus). Berlaku juga buat mode Full Text/karaoke." })
+            ] }),
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "flex items-center gap-2", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("button", { onClick: () => bgInputRef.current && bgInputRef.current.click(), className: "flex-1 font-mono text-[10px] uppercase px-2 py-1.5 cursor-pointer border border-[#1e1e1e] bg-transparent text-[#f5f5f0] hover:border-[#d4ff3f] hover:text-[#d4ff3f] transition-all rounded-sm", children: bgMediaFile ? `Ganti (${bgMediaKind === "video" ? "video" : "foto"})` : "Pilih Foto / Video" }),
+              bgMediaUrl && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("button", { onClick: clearBgMedia, className: "font-mono text-[10px] uppercase px-2 py-1.5 cursor-pointer border border-[#1e1e1e] bg-transparent text-[#ff6b6b] hover:border-[#ff6b6b] transition-all rounded-sm", children: "Hapus" }),
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("input", { ref: bgInputRef, type: "file", accept: "image/*,video/*", className: "hidden", onChange: (e) => { onPickBgMedia(e.target.files && e.target.files[0]); e.target.value = ""; } })
+            ] }),
+            bgMediaUrl && /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("label", { className: "font-mono text-[9px] text-[#4a4a4a] uppercase", children: [
+                "Redupkan background (biar lirik kebaca): ",
+                style.bgDim || 0,
+                "%"
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("input", { type: "range", min: 0, max: 90, step: 5, value: style.bgDim || 0, onChange: (e) => setStyle((s) => ({ ...s, bgDim: +e.target.value })), className: "w-full accent-[#d4ff3f]" })
             ] })
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "border-t border-[#1e1e1e] pt-3 mt-3", children: [
@@ -15109,12 +15238,21 @@
               ] })
             ] })
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "flex items-center justify-between p-2 bg-[#0e0e0e] rounded border border-[#1e1e1e]", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { children: [
-              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "font-mono text-[10px] text-[#d4ff3f] uppercase", children: "Full Text .lrc (Karaoke)" }),
-              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "font-mono text-[8px] text-[#4a4a4a]", children: "Semua baris lirik tampil; background abu-abu pindah mulus ke baris aktif mengikuti waktu [mm:ss.ms]. Klik baris buat lompat." })
+          /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "p-2 bg-[#0e0e0e] rounded border border-[#1e1e1e] space-y-2", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "flex items-center justify-between", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "font-mono text-[10px] text-[#d4ff3f] uppercase", children: "Full Text .lrc (Karaoke)" }),
+                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "font-mono text-[8px] text-[#4a4a4a]", children: "Semua baris lirik tampil; background abu-abu pindah mulus ke baris aktif mengikuti waktu [mm:ss.ms]. Klik baris buat lompat." })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("button", { onClick: () => setEffects((e) => ({ ...e, fullText: !e.fullText })), className: toggleBtn(effects.fullText), children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: toggleKnob(effects.fullText) }) })
             ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("button", { onClick: () => setEffects((e) => ({ ...e, fullText: !e.fullText })), className: toggleBtn(effects.fullText), children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: toggleKnob(effects.fullText) }) })
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "flex items-center justify-between", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { className: "font-mono text-[10px] text-[#f5f5f0] uppercase", children: "Tampilkan Waktu" }),
+                /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "font-mono text-[8px] text-[#4a4a4a]", children: "ON: waktu [mm:ss.ms] tampil di BAWAH teks tiap bait. OFF: waktu disembunyikan." })
+              ] }),
+              /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("button", { onClick: () => setEffects((e) => ({ ...e, fullTextTime: !e.fullTextTime })), className: toggleBtn(effects.fullTextTime), children: /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: toggleKnob(effects.fullTextTime) }) })
+            ] })
           ] }),
           /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "flex items-center justify-between p-2 bg-[#0e0e0e] rounded border border-[#1e1e1e]", children: [
             /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { children: [
@@ -15272,6 +15410,7 @@
             /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "font-mono text-[9px] text-[#4a4a4a]", children: "← / → · mundur / maju 5 dtk" }),
             /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "font-mono text-[9px] text-[#4a4a4a]", children: "↑ / ↓ · lompat antar baris lirik" }),
             /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "font-mono text-[9px] text-[#4a4a4a]", children: "E · editor · S · settings · D · daftar" }),
+            /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "font-mono text-[9px] text-[#4a4a4a]", children: "T · full text (karaoke)" }),
             /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "font-mono text-[9px] text-[#4a4a4a]", children: "[ / ] · kecepatan · 0 · ke awal" }),
             /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "font-mono text-[9px] text-[#4a4a4a]", children: "A / B · titik loop · L · on-off loop" }),
             /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "font-mono text-[9px] text-[#4a4a4a]", children: ", / . · geser 1 frame (1/30 dtk)" }),
@@ -15280,6 +15419,9 @@
         ] }) })
       ] }),
       /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", { className: "absolute inset-0 flex items-center justify-center px-[6vw] text-center z-10", style: { backgroundColor: style.bgColor }, children: [
+        bgMediaUrl && bgMediaKind === "image" && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("img", { src: bgMediaUrl, alt: "", className: "absolute inset-0 w-full h-full object-cover pointer-events-none" }, "bg-image"),
+        bgMediaUrl && bgMediaKind === "video" && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("video", { ref: bgVideoRef, src: bgMediaUrl, className: "absolute inset-0 w-full h-full object-cover pointer-events-none", autoPlay: true, loop: true, muted: true, playsInline: true }, "bg-video"),
+        bgMediaUrl && (style.bgDim || 0) > 0 && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("div", { className: "absolute inset-0 pointer-events-none", style: { backgroundColor: `rgba(0,0,0,${Math.min(90, style.bgDim || 0) / 100})` } }, "bg-dim"),
         effects.fullText && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)(
           "div",
           {
@@ -15289,10 +15431,12 @@
               const isActive = i === visibleIndex;
               const isPast = visibleIndex >= 0 && i < visibleIndex;
               const lineText = l.text.trim() ? (style.uppercase ? l.text.toUpperCase() : l.text) : "· · ·";
+              // v0.4.0: waktu [mm:ss.ms] dipindah ke BAWAH teks tiap bait
+              // (bukan di samping), dan bisa di-on/off via effects.fullTextTime
               return /* @__PURE__ */ (0, import_jsx_runtime3.jsxs)("div", {
                 "data-line": i,
                 onClick: () => seekTo(l.time),
-                className: "flex items-baseline justify-center gap-3 rounded-lg cursor-pointer",
+                className: "flex flex-col items-center justify-center gap-0.5 rounded-lg cursor-pointer",
                 style: {
                   width: "fit-content",
                   maxWidth: "92%",
@@ -15304,8 +15448,8 @@
                   transition: "background-color 500ms ease, opacity 500ms ease, transform 500ms ease"
                 },
                 children: [
-                  /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { style: { fontFamily: '"IBM Plex Mono", monospace', fontSize: "11px", letterSpacing: "0.08em", flexShrink: 0, color: isActive ? "#d4ff3f" : "#4a4a4a", transition: "color 500ms ease" }, children: `[${formatTimeWithMs2(l.time)}]` }),
-                  /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { style: { fontFamily: `"${style.fontFamily}", sans-serif`, fontSize: `clamp(15px, ${Math.max(15, Math.round(style.fontSize * 0.55))}px, 30px)`, fontWeight: style.bold ? "bold" : "normal", lineHeight: 1.45, color: isActive ? style.fontColor : "#8a8a8a", transition: "color 500ms ease" }, children: lineText })
+                  /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { style: { fontFamily: `"${style.fontFamily}", sans-serif`, fontSize: `clamp(15px, ${Math.max(15, Math.round(style.fontSize * 0.55))}px, 30px)`, fontWeight: style.bold ? "bold" : "normal", lineHeight: 1.45, color: isActive ? style.fontColor : "#8a8a8a", transition: "color 500ms ease" }, children: lineText }),
+                  effects.fullTextTime && /* @__PURE__ */ (0, import_jsx_runtime3.jsx)("span", { style: { fontFamily: '"IBM Plex Mono", monospace', fontSize: "10px", letterSpacing: "0.08em", lineHeight: 1.2, color: isActive ? "#d4ff3f" : "#4a4a4a", opacity: isActive ? 0.95 : 0.7, transition: "color 500ms ease, opacity 500ms ease" }, children: `[${formatTimeWithMs2(l.time)}]` })
                 ]
               }, `ft-${i}`);
             }) })
@@ -15867,6 +16011,20 @@
     }, [showPreview, aspectRatio, quality, fontSize, fontColor, bgColor, bold, italic, underline, uppercase, outline, outlineColor, letterSpacing, fontFamily, particles, particleColor, glow, glowColor, drawFrame, lyrics, clipEnabled, clipStart, clipEnd, textPos, watermark, watermarkPos, showProgressBar, bgDim, bgReady, audioDuration, animEnabled, animType, animSpeed, textBand, bandOpacity, fadeInOut, fadeDur, gapClear]);
     const startExport = async () => {
       if (!canvasRef.current) return;
+      // v0.4.0: pastikan font (termasuk Google Fonts) sudah siap sebelum
+      // mulai render frame pertama, biar tidak fallback ke font default.
+      try {
+        if (document.fonts && typeof document.fonts.load === "function") {
+          await Promise.race([
+            Promise.all([
+              document.fonts.load(`${fontSize}px "${fontFamily}"`),
+              document.fonts.load(`bold ${fontSize}px "${fontFamily}"`)
+            ]),
+            new Promise((res) => setTimeout(res, 1500))
+          ]);
+        }
+      } catch (err) {
+      }
       setStatus("recording");
       setProgress(0);
       particlesRef.current = [];

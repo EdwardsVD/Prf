@@ -17,6 +17,12 @@ Mulai **v0.1.0** kedua mode dipisah menjadi file masing-masing (sebelumnya digab
 - Export video lirik (720p/1080p) langsung dari browser.
 - Proyek bisa disimpan/dibuka lagi (`.json`) + autosave sesi di localStorage.
 
+### Baru di v0.4.0: Background Foto/Video + Banyak Font
+
+- **Background foto/video**: pilih file foto atau video jadi background; teks tetap di tengah. Video pendek **auto-loop** biar sinkron sama lagu; slider dim biar lirik kebaca. Berlaku juga di mode karaoke.
+- **25+ pilihan font** dalam 5 kategori (Settings → Style).
+- **Full Text (karaoke)**: waktu `[mm:ss.ms]` pindah ke bawah tiap bait + bisa di-on/off.
+
 ### Baru di v0.3.0: Gelombang Audio + Full Text Karaoke
 
 - **Gelombang Audio (Waveform)**: visualizer live yang tinggi, model (Bars / Mirror / Wave), dan warnanya bisa diatur — di Settings → Effects.
@@ -37,6 +43,24 @@ Mulai **v0.1.0** kedua mode dipisah menjadi file masing-masing (sebelumnya digab
 - Loop A-B, context menu (klik kanan / long-press), shortcut keyboard lengkap (tekan `?`).
 - Export MP4/WebM (MediaRecorder) sampai **1080p 60fps**; optimasi performa HP (preview adaptif, loop hemat baterai).
 - `Ctrl+S` simpan project (JSON) + autosave draft otomatis di browser.
+
+## Changelog v0.4.0 (Lyric Player)
+
+Update kali ini hanya di **Lyric Player** (`lyric_player.html`), tetap **satu file .html saja**; Video Editor tidak berubah.
+
+**Fix yang diminta:**
+- **Full Text (karaoke)**: waktu `[mm:ss.ms]` tidak lagi di samping teks — dipindah ke **paling bawah tiap bait**, plus tombol **on/off** ("Tampilkan Waktu" di Settings → Effects). Posisi teks otomatis menyesuaikan (layout berubah jadi kolom tengah).
+- **Zero Emoji diperkuat**: blok emoji yang sebelumnya lolos (🫶, flag-tag sequence 🏴󠁧󠁢󠁥󠁮󠁧󠁿, 🃏, ™, ‼️, ⏯, keycap, dll) sekarang ikut dibersihkan.
+
+**Fitur baru:**
+- **Pilihan font banyak** — 25+ font dalam 5 kategori (Modern, Tebal/Display, Elegan/Serif, Santai/Handwriting, Mono): Poppins, Montserrat, Bebas Neue, Oswald, Archivo Black, Playfair Display, Lora, Pacifico, Dancing Script, Caveat, Bangers, Righteous, JetBrains Mono, dll (Google Fonts dimuat di head; font juga di-preload sebelum export video biar tidak fallback).
+- **Background foto / video** — pilih foto atau video sebagai background (Settings → Style); teks **tetap di tengah**. Video yang lebih pendek dari lagu **di-loop otomatis** (misal lagu 12 menit, background 6 menit → diputar ulang terus biar tetap sinkron dengan subtitle). Ada slider **dim** (redupkan background 0–90%) biar lirik tetap kebaca. Berlaku juga untuk mode Full Text/karaoke. Background ikut play/pause mengikuti lagu.
+- Shortcut baru: **T** = toggle Full Text (karaoke).
+
+**Bug fixes:**
+- Fix `formatTimeWithMs` (label ms tapi cuma 1 digit + float error `01:05.049`) → sekarang milidetik 3 digit via pembulatan total-ms.
+- Fix sesi terakhir: style/effects/offset/animasi yang tersimpan sekarang **dipulihkan** kalau nama file audionya sama (sebelumnya diabaikan).
+- Fix potensi kebocoran object URL background (URL dibuat di luar state-updater + revoke saat unmount via ref).
 
 ## Changelog v0.3.0 (Lyric Player)
 
